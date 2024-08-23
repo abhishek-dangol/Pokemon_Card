@@ -101,9 +101,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    // textShadowColor: '#000',
-    // textShadowOffset: { width: 2, height: 2 },
-    // textShadowRadius: 3,
   },
   statusContainer: {
     marginTop: 20,
