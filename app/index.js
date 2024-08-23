@@ -7,10 +7,27 @@ const App = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [skipCount, setSkipCount] = useState(2);
   const [correctCount, setCorrectCount] = useState(0);
+  const [timer, setTimer] = useState(10);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  
+  useEffect(() => {
+    // Timer countdown logic
+    const interval = setInterval(() => {
+      setTimer(prevTimer => {
+        if (prevTimer <= 1) {
+          clearInterval(interval);
+          setIsButtonDisabled(true); // Disable buttons when timer reaches 0
+          return 0;
+        }
+        return prevTimer - 1;
+      });
+    }, 1000);
 
-
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
 
   const handlePressCorrect = ( )=> {
+    if (isButtonDisabled) return;
     // Trigger vibration
     Vibration.vibrate(100); // Vibrate for 100 milliseconds
 
@@ -21,7 +38,7 @@ const App = () => {
   };
 
   const handlePressSkip = () => {
-    // Trigger vibration
+    if (isButtonDisabled || skipCount <= 0) return;
     
     setSkipCount(skipCount - 1);
     if (skipCount > 0) {
@@ -35,16 +52,26 @@ const App = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.timerText}>{`Time Elapsed: ${timer}`}</Text>
+      </View>
       <View>
         <View>
           <PokemonCard {...pokemonData[currentIndex]} />
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={[styles.button, styles.greenButton]} onPress={handlePressCorrect}>
-            <Text style={styles.buttonText}>Correct</Text>
+          <TouchableOpacity 
+          style={[styles.button, isButtonDisabled ? styles.disabledButton : styles.greenButton]} 
+          onPress={handlePressCorrect}
+          disabled={isButtonDisabled}>
+            <Text style={[styles.buttonText, isButtonDisabled && styles.disabledButtonText]}>Correct</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, isSkipDisabled ? styles.disabledButton : styles.orangeButton]} onPress={handlePressSkip}>
-            <Text style={[styles.buttonText, isSkipDisabled && styles.disabledButtonText]}>Skip</Text>
+          <TouchableOpacity 
+          style={[styles.button, isSkipDisabled || isButtonDisabled ? styles.disabledButton : styles.orangeButton]} 
+          onPress={handlePressSkip}
+          disabled={isButtonDisabled}
+          >
+            <Text style={[styles.buttonText, (isSkipDisabled || isButtonDisabled) && styles.disabledButtonText]}>Skip</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.statusContainer}>
@@ -63,6 +90,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  header: {
+    marginBottom: 50
+  },
+  timerText: {
+    fontSize: 32,
+    fontWeightBold: 'bold',
+    color: 'red',
   },
   buttonContainer: {
     marginTop: 20,
