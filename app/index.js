@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, SafeAreaView, View, TouchableOpacity, Vibration } from 'react-native';
-import PokemonCard from '../components/PokemonCard';
-import pokemonData from '../data/pokemonData';
+import tabooData from '../data/tabooData';
+import TabooCard from '../components/tabooCard';
+
+const getRandomIndex = (length) => {
+    return Math.floor(Math.random() * length);
+}
 
 const App = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [skipCount, setSkipCount] = useState(2);
   const [correctCount, setCorrectCount] = useState(0);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(30);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   
   useEffect(() => {
@@ -17,6 +21,7 @@ const App = () => {
         if (prevTimer <= 1) {
           clearInterval(interval);
           setIsButtonDisabled(true); // Disable buttons when timer reaches 0
+          Vibration.vibrate(100);
           return 0;
         }
         return prevTimer - 1;
@@ -24,7 +29,7 @@ const App = () => {
     }, 1000);
 
     return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []);
+  }, [timer]);
 
   const handlePressCorrect = ( )=> {
     if (isButtonDisabled) return;
@@ -32,7 +37,7 @@ const App = () => {
     Vibration.vibrate(100); // Vibrate for 100 milliseconds
 
     // Update index and correct count
-    const nextIndex = (currentIndex + 1) % pokemonData.length;
+    const nextIndex = getRandomIndex(tabooData.length);
     setCurrentIndex(nextIndex);
     setCorrectCount(correctCount + 1);
   };
@@ -42,13 +47,23 @@ const App = () => {
     
     setSkipCount(skipCount - 1);
     if (skipCount > 0) {
-      const nextIndex = (currentIndex + 1) % pokemonData.length;
+      const nextIndex = getRandomIndex(tabooData.length);
       setCurrentIndex(nextIndex);
       Vibration.vibrate(100); // Vibrate for 100 milliseconds
     }
   };
 
   const isSkipDisabled = skipCount <= 0;
+
+  const handleReset = () => {
+    setCorrectCount(0);
+    setSkipCount(2);
+    setTimer(30);
+    setIsButtonDisabled(false);
+    
+    const randomIndex = Math.floor(Math.random() * tabooData.length);
+    setCurrentIndex(randomIndex);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -57,7 +72,7 @@ const App = () => {
       </View>
       <View>
         <View>
-          <PokemonCard {...pokemonData[currentIndex]} />
+          <TabooCard {...tabooData[currentIndex]} index={currentIndex + 1} />
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
@@ -72,6 +87,16 @@ const App = () => {
           disabled={isButtonDisabled}
           >
             <Text style={[styles.buttonText, (isSkipDisabled || isButtonDisabled) && styles.disabledButtonText]}>Skip</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              timer > 0 ? styles.disabledButton : (styles.greenButton, { backgroundColor: "red" })
+            ]}
+            onPress={handleReset}
+            disabled={timer > 0} // Disable button if timer is greater than 0
+          >
+            <Text style={styles.buttonText}>Reset</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.statusContainer}>
