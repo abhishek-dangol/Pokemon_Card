@@ -8,11 +8,13 @@ const TabooCard = ({
     hint3,
     hint4,
     hint5,
-    cardNumber
+    cardNumber,
+    SetNumber
 }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.cardNumber}>{cardNumber}</Text>
+      <Text style={[styles.cardNumber, { alignSelf: 'flex-end' } ]}>Set {SetNumber}</Text>
       <Text style={styles.wordText}>{word}</Text>
       <View style={styles.hintsContainer}>
         <Text style={styles.hintText}>{hint1}</Text>

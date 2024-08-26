@@ -5,6 +5,10 @@ import foodSetOne from '../data/SetOne/foodSetOne';
 import geographySetOne from '../data/SetOne/geographySetOne';
 import hollywoodSetOne from '../data/SetOne/hollywoodSetOne';
 import bollywoodSetOne from '../data/SetOne/bollywoodSetOne';
+import foodSetTwo from '../data/SetTwo/foodSetTwo';
+import geographySetTwo from '../data/SetTwo/geographySetTwo';
+import hollywoodSetTwo from '../data/SetTwo/hollywoodSetTwo';
+import bollywoodSetTwo from '../data/SetTwo/bollywoodSetTwo';
 import CategorySelector from '../components/categorySelector';
 import SettingsModal from '../components/settingsModal';
 import { getActionFromState } from '@react-navigation/native';
@@ -13,11 +17,20 @@ const getRandomIndex = (length) => {
     return Math.floor(Math.random() * length);
 };
 
-const allCategories = {
-  Food: foodSetOne,
-  Geography: geographySetOne,
-  Hollywood: hollywoodSetOne,
-  Bollywood: bollywoodSetOne
+
+const allSets = {
+  setOne: {
+    Food: foodSetOne,
+    Geography: geographySetOne,
+    Hollywood: hollywoodSetOne,
+    Bollywood: bollywoodSetOne
+  },
+  setTwo: {
+    Food: foodSetTwo,
+    Geography: geographySetTwo,
+    Hollywood: hollywoodSetTwo,
+    Bollywood: bollywoodSetTwo
+  }
 };
 
 const App = () => {
@@ -31,6 +44,7 @@ const App = () => {
   const [gameDuration, setGameDuration] = useState(60);
   const [timer, setTimer] = useState(0);
   const [selectedSkips, setSelectedSkips] = useState(2);
+  const [selectedSet, setSelectedSet] = useState('setOne')
 
 
   useEffect(() => {
@@ -86,7 +100,7 @@ const App = () => {
 
   const handleStartGame = (categories) => {
     const selected = categories.reduce((acc, category) => {
-      return [...acc, ...allCategories[category]];
+      return [...acc, ...allSets[selectedSet][category]];
     }, []);
     setSelectedData(selected);
     setTimer(gameDuration);
@@ -97,6 +111,10 @@ const App = () => {
   const toggleSettingsModal = () => {
     setIsSettingsModalVisible(!isSettingsModalVisible);
   }
+
+  const handleSetChange = (set) => {
+    setSelectedSet(set);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -114,6 +132,7 @@ const App = () => {
             onClose={toggleSettingsModal}
             onDurationChange={(duration) => setGameDuration(duration)}
             onSkipChange={(skip) => setSelectedSkips(skip)}
+            onSetChange={handleSetChange}
           />
         </>
       ) : (
