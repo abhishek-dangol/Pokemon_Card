@@ -2,8 +2,9 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
 import RNPickerSelect from 'react-native-picker-select';
 
-const SettingsModal = ({ isVisible, onClose, onDurationChange }) => {
+const SettingsModal = ({ isVisible, onClose, onDurationChange, onSkipChange }) => {
     const [selectedDuration, setSelectedDuration] = useState(60);
+    const [selectedSkips, setSelectedSkips] = useState(3);
 
   return (
     <Modal
@@ -15,7 +16,7 @@ const SettingsModal = ({ isVisible, onClose, onDurationChange }) => {
         <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}Game Settings></Text>
-                <Text style={styles.label}>Select Game Duration:</Text>
+                <Text style={styles.label}>Game Duration:</Text>
                 <RNPickerSelect
                     onValueChange={(value) => setSelectedDuration(value)}
                     items={[
@@ -31,10 +32,24 @@ const SettingsModal = ({ isVisible, onClose, onDurationChange }) => {
                     style={styles.pickerSelectStyles}
                     value={selectedDuration}
                 />
+                <Text style={styles.label}>Number of Skips:</Text>
+                <RNPickerSelect
+                    onValueChange={(value) => setSelectedSkips(value)}
+                    items={[
+                        { label: '1', value: 1 },
+                        { label: '2', value: 2 },
+                        { label: '3', value: 3 },
+                        { label: '4', value: 4 },
+                        { label: '5', value: 5 },
+                    ]}
+                    style={styles.pickerSelectStyles}
+                    value={selectedSkips}
+                />
                 <TouchableOpacity
                     style={styles.saveButton}
                     onPress={() => {
                         onDurationChange(selectedDuration);
+                        onSkipChange(selectedSkips);
                         onClose();
                     }}
                 >

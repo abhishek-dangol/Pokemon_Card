@@ -30,6 +30,7 @@ const App = () => {
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [gameDuration, setGameDuration] = useState(60);
   const [timer, setTimer] = useState(0);
+  const [selectedSkips, setSelectedSkips] = useState(2);
 
 
   useEffect(() => {
@@ -74,7 +75,7 @@ const App = () => {
 
   const handleReset = () => {
     setCorrectCount(0);
-    setSkipCount(2);
+    setSkipCount(selectedSkips);
     setTimer(gameDuration);
     setIsButtonDisabled(false);
     setIsGameStarted(true);
@@ -89,6 +90,7 @@ const App = () => {
     }, []);
     setSelectedData(selected);
     setTimer(gameDuration);
+    setSkipCount(selectedSkips);
     setIsGameStarted(true);
   };
 
@@ -111,6 +113,7 @@ const App = () => {
             isVisible={isSettingsModalVisible}
             onClose={toggleSettingsModal}
             onDurationChange={(duration) => setGameDuration(duration)}
+            onSkipChange={(skip) => setSelectedSkips(skip)}
           />
         </>
       ) : (
