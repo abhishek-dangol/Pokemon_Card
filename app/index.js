@@ -1,109 +1,138 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, SafeAreaView, View, TouchableOpacity, Vibration } from 'react-native';
-import tabooData from '../data/tabooData';
 import TabooCard from '../components/tabooCard';
+import foodSetOne from '../data/SetOne/foodSetOne';
+import geographySetOne from '../data/SetOne/geographySetOne';
+import hollywoodSetOne from '../data/SetOne/hollywoodSetOne';
+import bollywoodSetOne from '../data/bollywoodSetOne';
+import CategorySelector from '../components/categorySelector';
 
 const getRandomIndex = (length) => {
     return Math.floor(Math.random() * length);
-}
+};
+
+const allCategories = {
+  Food: foodSetOne,
+  Geography: geographySetOne,
+  Hollywood: hollywoodSetOne,
+  Bollywood: bollywoodSetOne
+};
 
 const App = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [skipCount, setSkipCount] = useState(2);
   const [correctCount, setCorrectCount] = useState(0);
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(10);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [selectedData, setSelectedData] = useState([]);
+
   useEffect(() => {
-    // Timer countdown logic
-    const interval = setInterval(() => {
-      setTimer(prevTimer => {
-        if (prevTimer <= 1) {
-          clearInterval(interval);
-          setIsButtonDisabled(true); // Disable buttons when timer reaches 0
-          Vibration.vibrate(100);
-          return 0;
-        }
-        return prevTimer - 1;
-      });
-    }, 1000);
+    let interval;
+    
+    if (isGameStarted) {
+      interval = setInterval(() => {
+        setTimer(prevTimer => {
+          if (prevTimer <= 1) {
+            clearInterval(interval);
+            setIsButtonDisabled(true);
+            Vibration.vibrate(100);
+            return 0;
+          }
+          return prevTimer - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
 
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, [timer]);
+    return () => clearInterval(interval);
+  }, [isGameStarted, timer]);
 
-  const handlePressCorrect = ( )=> {
+  const handlePressCorrect = () => {
     if (isButtonDisabled) return;
-    // Trigger vibration
-    Vibration.vibrate(100); // Vibrate for 100 milliseconds
-
-    // Update index and correct count
-    const nextIndex = getRandomIndex(tabooData.length);
+    Vibration.vibrate(100);
+    const nextIndex = getRandomIndex(selectedData.length);
     setCurrentIndex(nextIndex);
     setCorrectCount(correctCount + 1);
   };
 
   const handlePressSkip = () => {
     if (isButtonDisabled || skipCount <= 0) return;
-    
     setSkipCount(skipCount - 1);
     if (skipCount > 0) {
-      const nextIndex = getRandomIndex(tabooData.length);
+      const nextIndex = getRandomIndex(selectedData.length);
       setCurrentIndex(nextIndex);
-      Vibration.vibrate(100); // Vibrate for 100 milliseconds
+      Vibration.vibrate(100);
     }
   };
-
-  const isSkipDisabled = skipCount <= 0;
 
   const handleReset = () => {
     setCorrectCount(0);
     setSkipCount(2);
-    setTimer(30);
+    setTimer(10);
     setIsButtonDisabled(false);
-    
-    const randomIndex = Math.floor(Math.random() * tabooData.length);
+    setIsGameStarted(true);
+    //setIsGameStarted(false);
+    const randomIndex = Math.floor(Math.random() * selectedData.length);
     setCurrentIndex(randomIndex);
-  }
+    
+  };
+
+  const handleStartGame = (categories) => {
+    const selected = categories.reduce((acc, category) => {
+      return [...acc, ...allCategories[category]];
+    }, []);
+    setSelectedData(selected);
+    setIsGameStarted(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.timerText}>{`Time Elapsed: ${timer}`}</Text>
-      </View>
-      <View>
-        <View>
-          <TabooCard {...tabooData[currentIndex]} index={currentIndex + 1} />
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-          style={[styles.button, isButtonDisabled ? styles.disabledButton : styles.greenButton]} 
-          onPress={handlePressCorrect}
-          disabled={isButtonDisabled}>
-            <Text style={[styles.buttonText, isButtonDisabled && styles.disabledButtonText]}>Correct</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-          style={[styles.button, isSkipDisabled || isButtonDisabled ? styles.disabledButton : styles.orangeButton]} 
-          onPress={handlePressSkip}
-          disabled={isButtonDisabled}
-          >
-            <Text style={[styles.buttonText, (isSkipDisabled || isButtonDisabled) && styles.disabledButtonText]}>Skip</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              timer > 0 ? styles.disabledButton : (styles.greenButton, { backgroundColor: "red" })
-            ]}
-            onPress={handleReset}
-            disabled={timer > 0} // Disable button if timer is greater than 0
-          >
-            <Text style={styles.buttonText}>Reset</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusText}>Skips remaining: {skipCount > 0 ? skipCount : 0}</Text>
-          <Text style={styles.statusText}>Score: {correctCount}</Text>
-        </View>
-      </View>
+      {!isGameStarted ? (
+        <CategorySelector onCategoriesSelected={handleStartGame} />
+      ) : (
+        <>
+          <View style={styles.header}>
+            <Text style={styles.timerText}>{`Time Elapsed: ${timer}`}</Text>
+          </View>
+          <View>
+            {selectedData.length > 0 && (
+              <TabooCard {...selectedData[currentIndex]} index={currentIndex + 1} />
+            )}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.button, isButtonDisabled ? styles.disabledButton : styles.greenButton]} 
+                onPress={handlePressCorrect}
+                disabled={isButtonDisabled}
+              >
+                <Text style={[styles.buttonText, isButtonDisabled && styles.disabledButtonText]}>Correct</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.button, skipCount <= 0 || isButtonDisabled ? styles.disabledButton : styles.orangeButton]} 
+                onPress={handlePressSkip}
+                disabled={skipCount <= 0 || isButtonDisabled}
+              >
+                <Text style={[styles.buttonText, (skipCount <= 0 || isButtonDisabled) && styles.disabledButtonText]}>Skip</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  timer > 0 ? styles.disabledButton : (styles.greenButton, { backgroundColor: "red" })
+                ]}
+                onPress={handleReset}
+                disabled={timer > 0}
+              >
+                <Text style={styles.buttonText}>Reset</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.statusContainer}>
+              <Text style={styles.statusText}>Skips remaining: {skipCount > 0 ? skipCount : 0}</Text>
+              <Text style={styles.statusText}>Score: {correctCount}</Text>
+            </View>
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 };
@@ -139,7 +168,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 6,
     elevation: 5,
-    marginHorizontal: 5, // Adjusted margin
+    marginHorizontal: 5,
   },
   greenButton: {
     backgroundColor: '#4CAF50',

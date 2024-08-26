@@ -7,17 +7,19 @@ const TabooCard = ({
     hint2,
     hint3,
     hint4,
-    index
+    hint5,
+    cardNumber
 }) => {
   return (
     <View style={styles.card}>
-      <Text style={styles.cardIndex}>{index}</Text>
+      <Text style={styles.cardNumber}>{cardNumber}</Text>
       <Text style={styles.wordText}>{word}</Text>
       <View style={styles.hintsContainer}>
         <Text style={styles.hintText}>{hint1}</Text>
         <Text style={styles.hintText}>{hint2}</Text>
         <Text style={styles.hintText}>{hint3}</Text>
         <Text style={styles.hintText}>{hint4}</Text>
+        <Text style={styles.hintText}>{hint5}</Text>
       </View>
     </View>
   )
@@ -53,7 +55,7 @@ const styles = StyleSheet.create({
         color: '#6D4C41',
         fontFamily: "Avenir"
     },
-    cardIndex: {
+    cardNumber: {
         fontSize: 16,
         color: '#6D4C41',
         fontWeight: "bold",
