@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import foodSetOne from '../data/SetOne/foodSetOne';
 import geographySetOne from '../data/SetOne/geographySetOne';
 import hollywoodSetOne from '../data/SetOne/hollywoodSetOne';
-import bollywoodSetOne from '../data/bollywoodSetOne';
+import bollywoodSetOne from '../data/SetOne/bollywoodSetOne';
 
 const categories = [
   { name: 'Food', data: foodSetOne },

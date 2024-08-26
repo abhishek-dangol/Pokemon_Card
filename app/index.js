@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, SafeAreaView, View, TouchableOpacity, Vibration } from 'react-native';
+import { StyleSheet, Text, SafeAreaView, View, TouchableOpacity, Vibration, Modal, Button } from 'react-native';
 import TabooCard from '../components/tabooCard';
 import foodSetOne from '../data/SetOne/foodSetOne';
 import geographySetOne from '../data/SetOne/geographySetOne';
 import hollywoodSetOne from '../data/SetOne/hollywoodSetOne';
-import bollywoodSetOne from '../data/bollywoodSetOne';
+import bollywoodSetOne from '../data/SetOne/bollywoodSetOne';
 import CategorySelector from '../components/categorySelector';
+import SettingsModal from '../components/settingsModal';
+import { getActionFromState } from '@react-navigation/native';
 
 const getRandomIndex = (length) => {
     return Math.floor(Math.random() * length);
@@ -22,10 +24,13 @@ const App = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [skipCount, setSkipCount] = useState(2);
   const [correctCount, setCorrectCount] = useState(0);
-  const [timer, setTimer] = useState(10);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [selectedData, setSelectedData] = useState([]);
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const [gameDuration, setGameDuration] = useState(60);
+  const [timer, setTimer] = useState(0);
+
 
   useEffect(() => {
     let interval;
@@ -70,10 +75,9 @@ const App = () => {
   const handleReset = () => {
     setCorrectCount(0);
     setSkipCount(2);
-    setTimer(10);
+    setTimer(gameDuration);
     setIsButtonDisabled(false);
     setIsGameStarted(true);
-    //setIsGameStarted(false);
     const randomIndex = Math.floor(Math.random() * selectedData.length);
     setCurrentIndex(randomIndex);
     
@@ -84,13 +88,31 @@ const App = () => {
       return [...acc, ...allCategories[category]];
     }, []);
     setSelectedData(selected);
+    setTimer(gameDuration);
     setIsGameStarted(true);
   };
+
+  const toggleSettingsModal = () => {
+    setIsSettingsModalVisible(!isSettingsModalVisible);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       {!isGameStarted ? (
-        <CategorySelector onCategoriesSelected={handleStartGame} />
+        <>
+          <CategorySelector onCategoriesSelected={handleStartGame} />
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={toggleSettingsModal}
+          >
+            < Text style={styles.buttonText}>Settings</Text>
+          </TouchableOpacity>
+          <SettingsModal
+            isVisible={isSettingsModalVisible}
+            onClose={toggleSettingsModal}
+            onDurationChange={(duration) => setGameDuration(duration)}
+          />
+        </>
       ) : (
         <>
           <View style={styles.header}>
@@ -197,5 +219,11 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 16,
+  },
+  settingsButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'gray',
+    borderRadius: 5,
   },
 });
