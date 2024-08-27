@@ -4,7 +4,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const SettingsModal = ({ isVisible, onClose, onDurationChange, onSkipChange, onSetChange }) => {
-    const [selectedDuration, setSelectedDuration] = useState(60);
+    const [selectedDuration, setSelectedDuration] = useState(10);
     const [selectedSkips, setSelectedSkips] = useState(3);
     const [selectedSet, setSelectedSet] = useState('setOne');
 

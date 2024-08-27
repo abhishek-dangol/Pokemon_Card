@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from 'expo-router'; // Import useNavigation
 import foodSetOne from '../data/SetOne/foodSetOne';
 import geographySetOne from '../data/SetOne/geographySetOne';
 import hollywoodSetOne from '../data/SetOne/hollywoodSetOne';
@@ -14,6 +15,7 @@ const categories = [
 
 const CategorySelector = ({ onCategoriesSelected }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const navigation = useNavigation(); // Initialize navigation
 
   const toggleCategory = (category) => {
     setSelectedCategories(prev => {
@@ -30,7 +32,9 @@ const CategorySelector = ({ onCategoriesSelected }) => {
       alert('Please select at least two categories.');
       return;
     }
-    onCategoriesSelected(selectedCategories);
+    // onCategoriesSelected(selectedCategories);
+    // Navigate to the Game screen and pass the selected categories as parameters
+    navigation.navigate('Game', { categories: selectedCategories });
   };
 
   return (
