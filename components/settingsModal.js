@@ -3,15 +3,11 @@ import React, { useState } from 'react';
 import RNPickerSelect from 'react-native-picker-select';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const SettingsModal = ({ isVisible, onClose, onDurationChange, onSkipChange, onSetChange }) => {
-    const [selectedDuration, setSelectedDuration] = useState(10);
-    const [selectedSkips, setSelectedSkips] = useState(3);
-    const [selectedSet, setSelectedSet] = useState('setOne');
+const SettingsModal = ({ settings, onSave, onClose, isVisible }) => {
+    const [modalSettings, setModalSettings] = useState(settings);
 
     const handleSave = () => {
-        onDurationChange(selectedDuration);
-        onSkipChange(selectedSkips);
-        onSetChange(selectedSet); 
+        onSave(modalSettings);
         onClose();
     };
 
@@ -29,17 +25,17 @@ const SettingsModal = ({ isVisible, onClose, onDurationChange, onSkipChange, onS
                     </TouchableOpacity>
                     <Text style={styles.label}>Select Set:</Text>
                     <RNPickerSelect
-                        onValueChange={(value) => setSelectedSet(value)}
+                        onValueChange={(value) => setModalSettings({ ...modalSettings, selectedSet: value})}
                         items={[
                             { label: 'Set One', value: 'setOne' },
                             { label: 'Set Two', value: 'setTwo' },
                         ]}
                         style={styles.pickerSelectStyles}
-                        value={selectedSet}
+                        value={modalSettings.selectedSet}
                     />
                     <Text style={styles.label}>Game Duration:</Text>
                     <RNPickerSelect
-                        onValueChange={(value) => setSelectedDuration(value)}
+                        onValueChange={(value) => setModalSettings({ ...modalSettings, selectedDuration: parseInt(value)})}
                         items={[
                             { label: '10 seconds', value: 10 },
                             { label: '15 seconds', value: 15 },
@@ -51,11 +47,11 @@ const SettingsModal = ({ isVisible, onClose, onDurationChange, onSkipChange, onS
                             { label: '180 seconds', value: 180 },
                         ]}
                         style={styles.pickerSelectStyles}
-                        value={selectedDuration}
+                        value={modalSettings.selectedDuration}
                     />
                     <Text style={styles.label}>Number of Skips:</Text>
                     <RNPickerSelect
-                        onValueChange={(value) => setSelectedSkips(value)}
+                        onValueChange={(value) => setModalSettings({ ...modalSettings, selectedSkips: parseInt(value)})}
                         items={[
                             { label: '1', value: 1 },
                             { label: '2', value: 2 },
@@ -64,7 +60,7 @@ const SettingsModal = ({ isVisible, onClose, onDurationChange, onSkipChange, onS
                             { label: '5', value: 5 },
                         ]}
                         style={styles.pickerSelectStyles}
-                        value={selectedSkips}
+                        value={modalSettings.selectedSkips}
                     />
                     <TouchableOpacity
                         style={styles.saveButton}

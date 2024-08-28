@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Vibration, SafeAreaView } from 'react-native';
-import TabooCard from '../components/tabooCard'; // Import your TabooCard component
+import TabooCard from "../components/tabooCard"
 import foodSetOne from '../data/SetOne/foodSetOne';
 import geographySetOne from '../data/SetOne/geographySetOne';
 import hollywoodSetOne from '../data/SetOne/hollywoodSetOne';
@@ -10,48 +10,30 @@ import geographySetTwo from '../data/SetTwo/geographySetTwo';
 import hollywoodSetTwo from '../data/SetTwo/hollywoodSetTwo';
 import bollywoodSetTwo from '../data/SetTwo/bollywoodSetTwo';
 
-
 const allSets = {
-    setOne: {
-      Food: foodSetOne,
-      Geography: geographySetOne,
-      Hollywood: hollywoodSetOne,
-      Bollywood: bollywoodSetOne
-    },
-    setTwo: {
-      Food: foodSetTwo,
-      Geography: geographySetTwo,
-      Hollywood: hollywoodSetTwo,
-      Bollywood: bollywoodSetTwo
-    }
-  };
-  
+  setOne: {
+    Food: foodSetOne,
+    Geography: geographySetOne,
+    Hollywood: hollywoodSetOne,
+    Bollywood: bollywoodSetOne,
+  },
+  setTwo: {
+    Food: foodSetTwo,
+    Geography: geographySetTwo,
+    Hollywood: hollywoodSetTwo,
+    Bollywood: bollywoodSetTwo,
+  },
+};
 
 const getRandomIndex = (length) => Math.floor(Math.random() * length);
 
 const GameScreen = ({ route }) => {
-  // Extract params from route
-  // const { categories = [], gameDuration = 10, selectedSkips = 2 } = route.params || {};
-  const { categories, gameDuration = 10, selectedSkips } = route.params;
-  
-  // Prepare selectedData from categories
-  const [selectedData, setSelectedData] = useState([]);
-
-  useEffect(() => {
-    if (categories.length > 0) {
-      // Assume allSets is available and properly imported
-      const data = categories.reduce((acc, category) => {
-        const categoryData = allSets['setOne']?.[category] || []; // Use 'setOne' or 'setTwo' if needed
-        return [...acc, ...categoryData];
-      }, []);
-      setSelectedData(data);
-    }
-  }, [categories]);
+  const { settings, selectedData } = route.params;  // Use the route params
 
   const [currentIndex, setCurrentIndex] = useState(getRandomIndex(selectedData.length));
-  const [skipCount, setSkipCount] = useState(selectedSkips);
+  const [skipCount, setSkipCount] = useState(settings.selectedSkips);
   const [correctCount, setCorrectCount] = useState(0);
-  const [timer, setTimer] = useState(gameDuration);
+  const [timer, setTimer] = useState(settings.selectedDuration);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(true);
 
@@ -89,8 +71,8 @@ const GameScreen = ({ route }) => {
 
   const handleReset = () => {
     setCorrectCount(0);
-    setSkipCount(selectedSkips);
-    setTimer(gameDuration);
+    setSkipCount(settings.selectedSkips);
+    setTimer(settings.selectedDuration);
     setIsButtonDisabled(false);
     setIsGameStarted(true);
     setCurrentIndex(getRandomIndex(selectedData.length));
@@ -98,47 +80,48 @@ const GameScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.timerText}>{`Time Elapsed: ${timer}`}</Text>
+      <View style={styles.header}>
+        <Text style={styles.timerText}>{`Time Elapsed: ${timer}`}</Text>
+      </View>
+      <View>
+        {selectedData.length > 0 && (
+          <TabooCard {...selectedData[currentIndex]} index={currentIndex + 1} />
+        )}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[styles.button, isButtonDisabled ? styles.disabledButton : styles.greenButton]} 
+            onPress={handlePressCorrect}
+            disabled={isButtonDisabled}
+          >
+            <Text style={[styles.buttonText, isButtonDisabled && styles.disabledButtonText]}>Correct</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, skipCount <= 0 || isButtonDisabled ? styles.disabledButton : styles.orangeButton]} 
+            onPress={handlePressSkip}
+            disabled={skipCount <= 0 || isButtonDisabled}
+          >
+            <Text style={[styles.buttonText, (skipCount <= 0 || isButtonDisabled) && styles.disabledButtonText]}>Skip</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              timer > 0 ? styles.disabledButton : (styles.greenButton, { backgroundColor: 'red' }),
+            ]}
+            onPress={handleReset}
+            disabled={timer > 0}
+          >
+            <Text style={styles.buttonText}>Reset</Text>
+          </TouchableOpacity>
         </View>
-        <View>
-          {selectedData.length > 0 && (
-            <TabooCard {...selectedData[currentIndex]} index={currentIndex + 1} />
-          )}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={[styles.button, isButtonDisabled ? styles.disabledButton : styles.greenButton]} 
-              onPress={handlePressCorrect}
-              disabled={isButtonDisabled}
-            >
-              <Text style={[styles.buttonText, isButtonDisabled && styles.disabledButtonText]}>Correct</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, skipCount <= 0 || isButtonDisabled ? styles.disabledButton : styles.orangeButton]} 
-              onPress={handlePressSkip}
-              disabled={skipCount <= 0 || isButtonDisabled}
-            >
-              <Text style={[styles.buttonText, (skipCount <= 0 || isButtonDisabled) && styles.disabledButtonText]}>Skip</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                timer > 0 ? styles.disabledButton : (styles.greenButton, { backgroundColor: "red" })
-              ]}
-              onPress={handleReset}
-              disabled={timer > 0}
-            >
-              <Text style={styles.buttonText}>Reset</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.statusContainer}>
-            <Text style={styles.statusText}>Skips remaining: {skipCount > 0 ? skipCount : 0}</Text>
-            <Text style={styles.statusText}>Score: {correctCount}</Text>
-          </View>
+        <View style={styles.statusContainer}>
+          <Text style={styles.statusText}>Skips remaining: {skipCount > 0 ? skipCount : 0}</Text>
+          <Text style={styles.statusText}>Score: {correctCount}</Text>
         </View>
-  </SafeAreaView>
+      </View>
+    </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
     container: {
