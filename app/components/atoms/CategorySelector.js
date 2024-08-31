@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { categories } from "../../constants";
 
-export const CategorySelector = ({ onCategoriesSelected }) => {
+export const CategorySelector = ({
+  onCategoriesSelected,
+  selectedSet = "setOne",
+}) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const toggleCategory = (category) => {
-    console.log(category)
     setSelectedCategories((prev) => {
       if (prev.includes(category)) {
         return prev.filter((item) => item !== category);
@@ -17,7 +19,6 @@ export const CategorySelector = ({ onCategoriesSelected }) => {
   };
 
   const handleStartGame = () => {
-
     if (selectedCategories.length < 2) {
       alert("Please select at least two categories.");
       return;
@@ -27,7 +28,7 @@ export const CategorySelector = ({ onCategoriesSelected }) => {
 
   return (
     <View style={styles.container}>
-      {categories.map((cat) => (
+      {categories[selectedSet].map((cat) => (
         <TouchableOpacity
           key={cat.name}
           style={[

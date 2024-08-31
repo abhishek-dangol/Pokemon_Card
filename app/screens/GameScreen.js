@@ -9,10 +9,13 @@ import {
 } from "react-native";
 import { TabooCard } from "../components"; // Import your TabooCard component
 import { allSets } from "../../data";
+import { useNavigation } from "@react-navigation/native";
 
 const getRandomIndex = (length) => Math.floor(Math.random() * length);
 
 export const GameScreen = ({ route }) => {
+  const navigation = useNavigation();
+
   // Extract params from route
   const {
     gameDuration = 10,
@@ -82,7 +85,10 @@ export const GameScreen = ({ route }) => {
     setCurrentIndex(getRandomIndex(selectedData.length));
   };
 
-  console.log(selectedData);
+  const Goto = () => {
+    navigation.navigate("Home");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -148,6 +154,11 @@ export const GameScreen = ({ route }) => {
             Skips remaining: {skipCount > 0 ? skipCount : 0}
           </Text>
           <Text style={styles.statusText}>Score: {correctCount}</Text>
+        </View>
+        <View style={styles.statusContainer}>
+          <TouchableOpacity onPress={Goto}>
+            <Text style={styles.button}>Goto Home</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

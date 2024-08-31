@@ -5,4 +5,6 @@ export {
   Hollywood,
   Bollywood,
   categories,
+  SetOne,
+  SetTwo,
 } from "./Categories";

@@ -3,7 +3,6 @@ import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import { CategorySelector, SettingsModal } from "../components";
-import { allSets } from "../../data";
 
 export const HomeScreen = () => {
   const navigation = useNavigation();
@@ -40,7 +39,10 @@ export const HomeScreen = () => {
         selectedDuration={gameDuration}
         selectedSkips={selectedSkips}
       />
-      <CategorySelector onCategoriesSelected={handleStartGame} />
+      <CategorySelector
+        onCategoriesSelected={handleStartGame}
+        selectedSet={selectedSet}
+      />
       <TouchableOpacity
         style={styles.settingsButton}
         onPress={toggleSettingsModal}
