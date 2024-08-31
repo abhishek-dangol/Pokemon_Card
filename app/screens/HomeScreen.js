@@ -13,14 +13,8 @@ export const HomeScreen = () => {
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
   const handleStartGame = (categories) => {
-    console.log("Selected Categories:", categories); // Log selected categories
-    const selectedCategories = categories.reduce((acc, category) => {
-      const data = allSets[selectedSet]?.[category] || []; // Fetch data based on category
-      return [...acc, ...data];
-    }, []);
-
     navigation.navigate("Game", {
-      selectedCategories,
+      categories,
       gameDuration,
       selectedSkips,
     });
@@ -42,6 +36,9 @@ export const HomeScreen = () => {
         onDurationChange={(duration) => setGameDuration(duration)}
         onSkipChange={(skip) => setSelectedSkips(skip)}
         onSetChange={handleSetChange}
+        selectedSet={selectedSet}
+        selectedDuration={gameDuration}
+        selectedSkips={selectedSkips}
       />
       <CategorySelector onCategoriesSelected={handleStartGame} />
       <TouchableOpacity

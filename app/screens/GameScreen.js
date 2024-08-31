@@ -17,21 +17,20 @@ export const GameScreen = ({ route }) => {
   const {
     gameDuration = 10,
     selectedSkips = 2,
-    selectedCategories = [],
+    categories = [],
   } = route.params || {};
-  // Prepare selectedData from selectedCategories
+  // Prepare selectedData from categories
   const [selectedData, setSelectedData] = useState([]);
-  console.log(selectedCategories);
   useEffect(() => {
-    if (selectedCategories.length > 0) {
+    if (categories.length > 0) {
       // Assume allSets is available and properly imported
-      const data = selectedCategories.reduce((acc, category) => {
+      const data = categories.reduce((acc, category) => {
         const categoryData = allSets["setOne"]?.[category] || []; // Use 'setOne' or 'setTwo' if needed
         return [...acc, ...categoryData];
       }, []);
       setSelectedData(data);
     }
-  }, [selectedCategories]);
+  }, [categories]);
 
   const [currentIndex, setCurrentIndex] = useState(
     getRandomIndex(selectedData.length)
