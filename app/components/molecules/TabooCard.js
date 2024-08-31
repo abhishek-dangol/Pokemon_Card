@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Platform } from 'react-native'
 import React from 'react'
 
-const TabooCard = ({
+export const TabooCard = ({
     word,
     hint1,
     hint2,
@@ -27,7 +27,6 @@ const TabooCard = ({
   )
 }
 
-export default TabooCard
 
 const styles = StyleSheet.create({
     card: {
