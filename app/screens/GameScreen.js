@@ -6,38 +6,62 @@ import {
   StyleSheet,
   Vibration,
   SafeAreaView,
+  Modal,
 } from "react-native";
 import { TabooCard } from "../components"; // Import your TabooCard component
 import { allSets } from "../../data";
 import { useNavigation } from "@react-navigation/native";
 
-const getRandomIndex = (length) => Math.floor(Math.random() * length);
+
+
 
 export const GameScreen = ({ route }) => {
   const navigation = useNavigation();
+
 
   // Extract params from route
   const {
     gameDuration = 10,
     selectedSkips = 2,
     categories = [],
+    selectedSet = "setOne",
   } = route.params || {};
+
   // Prepare selectedData from categories
   const [selectedData, setSelectedData] = useState([]);
-  useEffect(() => {
-    if (categories.length > 0) {
-      // Assume allSets is available and properly imported
-      const data = categories.reduce((acc, category) => {
-        const categoryData = allSets["setOne"]?.[category] || []; // Use 'setOne' or 'setTwo' if needed
-        return [...acc, ...categoryData];
-      }, []);
-      setSelectedData(data);
+  const [usedIndices, setUsedIndices] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+useEffect(() => {
+  if (categories.length > 0) {
+    const data = categories.reduce((acc, category) => {
+      const categoryData = allSets[selectedSet]?.[category] || [];
+      return [...acc, ...categoryData];
+    }, []);
+    setSelectedData(data);
+    if (data.length > 0) {
+      const initialIndex = getRandomIndex(data.length, []);
+      setCurrentIndex(initialIndex);
+      setUsedIndices([initialIndex]); // Optionally set the initial index as used
     }
-  }, [categories]);
+  }
+}, [categories]);
+
+
+  const getRandomIndex = (length, usedIndices) => {
+    let index;
+    do {
+      index = Math.floor(Math.random() * length);
+    } while (usedIndices.includes(index));
+    return index;
+  }
+
+  //console.log("Selected Data:", selectedData);
 
   const [currentIndex, setCurrentIndex] = useState(
-    getRandomIndex(selectedData.length)
+    selectedData.length ? getRandomIndex(selectedData.length, usedIndices) : 0
   );
+
   const [skipCount, setSkipCount] = useState(selectedSkips);
   const [correctCount, setCorrectCount] = useState(0);
   const [timer, setTimer] = useState(gameDuration);
@@ -63,18 +87,32 @@ export const GameScreen = ({ route }) => {
   }, [isGameStarted]);
 
   const handlePressCorrect = () => {
-    if (isButtonDisabled) return;
+    if (isButtonDisabled || usedIndices.length >= selectedData.length) return;
     Vibration.vibrate(100);
     setCorrectCount(correctCount + 1);
-    setCurrentIndex(getRandomIndex(selectedData.length));
+    updateCardIndex();
   };
 
   const handlePressSkip = () => {
-    if (isButtonDisabled || skipCount <= 0) return;
-    setSkipCount(skipCount - 1);
-    setCurrentIndex(getRandomIndex(selectedData.length));
+    if (isButtonDisabled || skipCount <= 0 || usedIndices.length >= selectedData.length) return;
     Vibration.vibrate(100);
+    setSkipCount(skipCount - 1);
+    updateCardIndex();
+    
   };
+
+  const updateCardIndex = () => {
+    if (usedIndices.length >= selectedData.length){
+      setIsModalVisible(true);
+      setIsGameStarted(false);
+      return;
+    }
+    const newIndex = getRandomIndex(selectedData.length, usedIndices);
+    setCurrentIndex(newIndex);
+    setUsedIndices([...usedIndices, newIndex]);
+  }
+
+  console.log(usedIndices);
 
   const handleReset = () => {
     setCorrectCount(0);
@@ -82,7 +120,9 @@ export const GameScreen = ({ route }) => {
     setTimer(gameDuration);
     setIsButtonDisabled(false);
     setIsGameStarted(true);
-    setCurrentIndex(getRandomIndex(selectedData.length));
+    setIsModalVisible(false);
+    setCurrentIndex(getRandomIndex(selectedData.length, []));
+    setUsedIndices([]);
   };
 
   const Goto = () => {
@@ -91,6 +131,25 @@ export const GameScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>All Cards have been used</Text>
+            <TouchableOpacity style={[styles.button, styles.buttonClose]}
+            onPress={() => setIsModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <View style={styles.header}>
         <Text style={styles.timerText}>{`Time Elapsed: ${timer}`}</Text>
       </View>
@@ -102,15 +161,15 @@ export const GameScreen = ({ route }) => {
           <TouchableOpacity
             style={[
               styles.button,
-              isButtonDisabled ? styles.disabledButton : styles.greenButton,
+              isButtonDisabled || usedIndices.length >= selectedData.length ? styles.disabledButton : styles.greenButton,
             ]}
             onPress={handlePressCorrect}
-            disabled={isButtonDisabled}
+            disabled={isButtonDisabled || usedIndices.length >= selectedData.length}
           >
             <Text
               style={[
                 styles.buttonText,
-                isButtonDisabled && styles.disabledButtonText,
+                isButtonDisabled || usedIndices.length >= selectedData.length && styles.disabledButtonText,
               ]}
             >
               Correct
@@ -119,17 +178,17 @@ export const GameScreen = ({ route }) => {
           <TouchableOpacity
             style={[
               styles.button,
-              skipCount <= 0 || isButtonDisabled
+              skipCount <= 0 || isButtonDisabled || usedIndices.length >= selectedData.length
                 ? styles.disabledButton
                 : styles.orangeButton,
             ]}
             onPress={handlePressSkip}
-            disabled={skipCount <= 0 || isButtonDisabled}
+            disabled={skipCount <= 0 || isButtonDisabled || usedIndices.length >= selectedData.length}
           >
             <Text
               style={[
                 styles.buttonText,
-                (skipCount <= 0 || isButtonDisabled) &&
+                (skipCount <= 0 || isButtonDisabled || usedIndices.length >= selectedData.length) &&
                   styles.disabledButtonText,
               ]}
             >
@@ -230,4 +289,32 @@ const styles = StyleSheet.create({
     backgroundColor: "gray",
     borderRadius: 5,
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  }
 });
